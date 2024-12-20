@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import LoginPage from './loginPage';
 import RegisterPage from './RegisterPage';
-import PostsPage from './PostPage';
+import PostsPage from './postPage';
 import NavBar from './NavBar';
 import { AuthProvider } from './authContext';
 import PrivateRoute from './privateRoute';
