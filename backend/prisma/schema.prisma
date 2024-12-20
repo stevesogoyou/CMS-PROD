@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model belong {
+  post_id_Post         BigInt
+  category_id_Category Int
+  category             category @relation(fields: [category_id_Category], references: [category_id_Category], onUpdate: Restrict, map: "FK_Belong_category_id_Category")
+  post                 post     @relation(fields: [post_id_Post], references: [post_id_Post], onUpdate: Restrict, map: "FK_Belong_post_id_Post")
+
+  @@id([post_id_Post, category_id_Category])
+  @@index([category_id_Category], map: "FK_Belong_category_id_Category")
+}
+
+model category {
+  category_id_Category   Int      @id @default(autoincrement())
+  category_name_Category String?  @db.VarChar(100)
+  belong                 belong[]
+  tags                   tags[]
+}
+
+model comments {
+  comment_id_Comments          Int       @id @default(autoincrement())
+  content_Comments             String?   @db.VarChar(500)
+  creation_date_Comments       DateTime? @db.DateTime(0)
+  edition_date_Comments        DateTime? @db.DateTime(0)
+  delete_date_comment_Comments DateTime? @db.DateTime(0)
+  post_id_Post                 BigInt?
+  user_id_Users                BigInt?
+  post                         post?     @relation(fields: [post_id_Post], references: [post_id_Post], onDelete: Restrict, onUpdate: Restrict, map: "FK_Comments_post_id_Post")
+  users                        users?    @relation(fields: [user_id_Users], references: [user_id_Users], onDelete: Restrict, onUpdate: Restrict, map: "FK_Comments_user_id_Users")
+
+  @@index([post_id_Post], map: "FK_Comments_post_id_Post")
+  @@index([user_id_Users], map: "FK_Comments_user_id_Users")
+}
+
+model post {
+  post_id_Post           BigInt     @id @default(autoincrement())
+  title_Articles         String?    @db.VarChar(100)
+  content_Articles       String?    @db.VarChar(1000)
+  creation_date_Articles DateTime?  @db.DateTime(0)
+  edition_date_Articles  DateTime?  @db.DateTime(0)
+  delete_date_Post       DateTime?  @db.DateTime(0)
+  post_statut_Post       Boolean?
+  user_id_Users          BigInt?
+  media_url              String?    @db.VarChar(255)  // URL du média
+  media_type             String?    @db.VarChar(50)   // Type de média (image, video, none)
+  likes_count            Int        @default(0)      // Nombre de likes
+  belong                 belong[]
+  comments               comments[]
+  users                  users?     @relation(fields: [user_id_Users], references: [user_id_Users], onDelete: Restrict, onUpdate: Restrict, map: "FK_Post_user_id_Users")
+
+  @@index([user_id_Users], map: "FK_Post_user_id_Users")
+}
+
+model role {
+  role_id_Role   Int                 @id @default(autoincrement())
+  role_name_Role role_role_name_Role
+  users          users[]
+}
+
+model tags {
+  tag_id_Tags          Int       @id @default(autoincrement())
+  tag_name_Tags        String?   @db.VarChar(100)
+  category_id_Category Int?
+  category             category? @relation(fields: [category_id_Category], references: [category_id_Category], onDelete: Restrict, onUpdate: Restrict, map: "FK_Tags_category_id_Category")
+
+  @@index([category_id_Category], map: "FK_Tags_category_id_Category")
+}
+
+model users {
+  user_id_Users    BigInt     @id @default(autoincrement())
+  first_name_Users String?    @db.VarChar(100)
+  last_name_Users  String?    @db.VarChar(100)
+  email_Users      String?    @unique @db.VarChar(255)
+  password_Users   String?    @db.VarChar(100)
+  role_id_Role     Int?
+  comments         comments[]
+  post             post[]
+  role             role?      @relation(fields: [role_id_Role], references: [role_id_Role], onDelete: Restrict, onUpdate: Restrict, map: "FK_Users_role_id_Role")
+
+  @@index([role_id_Role], map: "FK_Users_role_id_Role")
+}
+
+enum role_role_name_Role {
+  Admin
+  User
+  Moderator
+}
